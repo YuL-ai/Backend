@@ -2,21 +2,15 @@ package com.usuarios.Demo.controller;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.usuarios.Demo.model.UserModel;
 import com.usuarios.Demo.service.UserModelService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
-
 import com.usuarios.Demo.dto.APIResponse;
-
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -30,13 +24,13 @@ public class UserModelController {
         this.userModelService = userModelService;
     }
 
-/*Buscamos toods los usuairos */
+/*Buscamos toods los usuarios */
 
     @Operation(summary = "Obtiene todos los usuarios.", description = "Devuelve todos los usuarios si que existen.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "¡Usuarios obtenidos correctamente!"),
-        @ApiResponse(responseCode = "404", description = "No hay usuarios"),
-        @ApiResponse(responseCode = "500", description = "El server se muricio")
+        @ApiResponse(responseCode = "404", description = "No hay usuarios."),
+        @ApiResponse(responseCode = "500", description = "El server se muricio.")
     })
 
     @GetMapping
@@ -62,8 +56,8 @@ public class UserModelController {
     @Operation(summary = "Obtiene un usuario segun su ID.", description = "Devuelve al usuario si es que existe.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "¡Usuario obtenido correctamente!"),
-        @ApiResponse(responseCode = "404", description = "No hay usuarios"),
-        @ApiResponse(responseCode = "500", description = "El server ta muertecido")
+        @ApiResponse(responseCode = "404", description = "No hay usuarios."),
+        @ApiResponse(responseCode = "500", description = "El server ta muertecido.")
     })
 
     @GetMapping("/{id}")
@@ -84,8 +78,8 @@ public class UserModelController {
     @Operation(summary = "Crea un usuario nuevo.", description = "Devuelve al usuario si es que se creo.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "¡Usuario se ha creado correctamente!"),
-        @ApiResponse(responseCode = "404", description = "No se pudo crear al usuario"),
-        @ApiResponse(responseCode = "500", description = "El server ta entero muerto")
+        @ApiResponse(responseCode = "404", description = "No se pudo crear al usuario."),
+        @ApiResponse(responseCode = "500", description = "El server ta entero muerto.")
     })
     @PostMapping
     public ResponseEntity<APIResponse<UserModel>> createUser(@RequestBody UserModel user) {
@@ -106,6 +100,12 @@ public class UserModelController {
     }
 
 /*Actualizamos al user usando su id */
+    @Operation(summary = "Actualiza un usuario.", description = "Devuelve al usuario si es que se creo.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "¡Usuario se ha actualizado correctamente!"),
+        @ApiResponse(responseCode = "404", description = "No se pudo actualizar al usuario."),
+        @ApiResponse(responseCode = "500", description = "El server ta ded.")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<APIResponse<UserModel>> actualizarUser(@PathVariable UUID id, @RequestBody UserModel user) {
         try {
@@ -125,6 +125,12 @@ public class UserModelController {
     }
 
     /*Mostramos los usuarios activos */
+    @Operation(summary = "Muestra todos los usuarios activos.", description = "Devuelte todos los usuarios activos.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "¡Mira, los usuarios activos están aquí!"),
+        @ApiResponse(responseCode = "404", description = "No se pudo crear al usuario."),
+        @ApiResponse(responseCode = "500", description = "Lamento informarle, el fallacimiento, muerte y recien sepultado, servidor.")
+    })
     @GetMapping("/active")
     public ResponseEntity<APIResponse<List<UserModel>>> mostrarUsuariosActivos() {
         try {
@@ -144,6 +150,12 @@ public class UserModelController {
     }
 
     /*Mostramos los usuarios inactivos */
+    @Operation(summary = "Muestra todos los usuarios inactivos.", description = "Devuelte todos los usuarios inactivos.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "¡Estos usuarios son los inactivos, atrápenlos!"),
+        @ApiResponse(responseCode = "404", description = "No se pudo crear al usuario"),
+        @ApiResponse(responseCode = "500", description = "¡Oopsy daisy! El server se calló :).")
+    })
     @GetMapping("/inactive")
     public ResponseEntity<APIResponse<List<UserModel>>> mostrarUsuariosInactivos() {
         try {
@@ -163,6 +175,12 @@ public class UserModelController {
     }
 
     /*Reactivamos los usuarios en el controller */
+    @Operation(summary = "Reactivamos al usuario según su ID.", description = "Devuelte al usuario reactivado.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "¡Usuario reactivado!"),
+        @ApiResponse(responseCode = "404", description = "No se pudo crear al usuario"),
+        @ApiResponse(responseCode = "500", description = "[Gasp in spanish] El server no se encuentra disponible.")
+    })
     @PutMapping("/{id}/reactivar")
     public ResponseEntity<APIResponse<UserModel>> reactivarUsuario(@PathVariable UUID id) {
         try {
@@ -186,6 +204,12 @@ public class UserModelController {
     }
 
 /*Borramos usuarios */
+    @Operation(summary = "Se elimina al usuario según su ID.", description = "Nos elimina al usuario.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "¡Usuario eliminado!"),
+        @ApiResponse(responseCode = "404", description = "No se pudo eliminar al usuario."),
+        @ApiResponse(responseCode = "500", description = "Server no ta.")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<APIResponse<String>> deleteUser(@PathVariable UUID id) {
         try {

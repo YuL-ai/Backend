@@ -60,7 +60,7 @@ public class ReservaService {
                 .orElseThrow(() -> new EntityNotFoundException("Papá no encontrado con ID: " + papaId));
 
         if (fechaVisita.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("La fecha de visita debe ser posterior al día actual.");
+            throw new IllegalArgumentException("Nuestros papás no viajan en el tiempo, por lo que la fecha de visita debe ser posterior al día actual.");
         }
 
         // Validar si el papá ya está reservado para esa fecha

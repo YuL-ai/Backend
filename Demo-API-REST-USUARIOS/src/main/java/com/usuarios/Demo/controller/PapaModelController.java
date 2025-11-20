@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import com.usuarios.Demo.model.PapaModel;
 import com.usuarios.Demo.service.PapaModelService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -25,6 +28,12 @@ public class PapaModelController {
     }
 
     /* Obtener todos los papás */
+    @Operation(summary = "Obtiene todos los papás.", description = "Devuelve todos los papás si que existen.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "¡Papás obtenidos correctamente!"),
+        @ApiResponse(responseCode = "404", description = "No hay papás."),
+        @ApiResponse(responseCode = "500", description = "El server se muricio.")
+    })
     @GetMapping
     public ResponseEntity<?> obtenerTodosLosPapas() {
         try {
@@ -36,6 +45,12 @@ public class PapaModelController {
     }
 
     /* Obtener papá por ID */
+    @Operation(summary = "Obtiene un papá segun su ID.", description = "Devuelve al papá si es que existe.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "¡Papá obtenido correctamente!"),
+        @ApiResponse(responseCode = "404", description = "No hay papá."),
+        @ApiResponse(responseCode = "500", description = "El server ta muertecido.")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPapaPorId(@PathVariable UUID id) {
         try {
@@ -47,6 +62,12 @@ public class PapaModelController {
     }
 
     /* Crear un nuevo papá */
+    @Operation(summary = "Crea un papá nuevo.", description = "Devuelve al papá si es que se creo.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "¡Papá se ha creado correctamente!"),
+        @ApiResponse(responseCode = "404", description = "No se pudo crear al papá."),
+        @ApiResponse(responseCode = "500", description = "El server ta entero muerto.")
+    })
     @PostMapping
     public ResponseEntity<?> crearPapa(@RequestBody PapaModel papa) {
         try {
@@ -61,6 +82,12 @@ public class PapaModelController {
     }
 
     /* Actualizar papá existente */
+    @Operation(summary = "Actualiza un papá.", description = "Devuelve al papá si es que se creo.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "¡Papá se ha actualizado correctamente!"),
+        @ApiResponse(responseCode = "404", description = "No se pudo actualizar al papá."),
+        @ApiResponse(responseCode = "500", description = "El server ta ded.")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarPapa(@PathVariable UUID id, @RequestBody PapaModel papa) {
         try {
@@ -76,7 +103,13 @@ public class PapaModelController {
         }
     }
 
-    /* Eliminar papá (se fue a comprar cigarros 😢) */
+    /* Eliminar papá (se fue a comprar cigarros) */
+    @Operation(summary = "Eliminamos un papá segun su ID.", description = "Nos devuelve el mensaje de eliminación de papá")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "¡Papá se fue a comprar cigarros!"),
+        @ApiResponse(responseCode = "404", description = "Papa no tenía dinero para cigarros, no pudo salir."),
+        @ApiResponse(responseCode = "500", description = "El server se fue a comprar cigarrillos y leche, junto al papá.")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarPapa(@PathVariable UUID id) {
         try {
