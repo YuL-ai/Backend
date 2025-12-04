@@ -63,9 +63,6 @@ public class UserModelService {
     //Setea el rol
     user.setRol("USER");
 
-    // ENCRIPTAR CONTRASEÑA
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-
     // GUARDAR
     UserModel nuevo = userModelRepository.save(user);
 

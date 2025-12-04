@@ -2,9 +2,10 @@ package com.usuarios.Demo.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.usuarios.Demo.dto.AdminLoginRequest;
@@ -25,20 +26,30 @@ import com.usuarios.Demo.security.JwtUtil;
 @CrossOrigin(origins = "*", allowCredentials = "false")
 public class AuthController {
 
+    // =============================
+    // 🔧 Dependencias del controlador
+    // =============================
     private final AuthenticationManager authenticationManager;
     private final IAdminModelRepository adminRepository;
     private final IUserModelRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(AuthenticationManager authenticationManager,
-                          IAdminModelRepository adminRepository,
-                          IUserModelRepository userRepository,
-                          JwtUtil jwtUtil) {
-
+    // =============================
+    // 🔧 Constructor con inyección
+    // =============================
+    public AuthController(
+            AuthenticationManager authenticationManager,
+            IAdminModelRepository adminRepository,
+            IUserModelRepository userRepository,
+            JwtUtil jwtUtil,
+            PasswordEncoder passwordEncoder
+    ) {
         this.authenticationManager = authenticationManager;
         this.adminRepository = adminRepository;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // ===========================================
@@ -47,24 +58,20 @@ public class AuthController {
     @PostMapping("/admin/login")
     public ResponseEntity<?> loginAdmin(@RequestBody AdminLoginRequest request) {
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getEmail(), request.getPassword()
-                    )
-            );
+        // 1. Buscar admin por email
+        AdminModel admin = adminRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Admin no encontrado"));
 
-            AdminModel admin = adminRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new RuntimeException("Admin no encontrado"));
-
-            String token = jwtUtil.generateToken(admin);
-
-            return ResponseEntity.ok(new AdminLoginResponse(token, admin));
-
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Credenciales incorrectas");
+        
+        if (!request.getPassword().equals(admin.getPassword())) {
+                throw new BadCredentialsException("Credenciales incorrectas");
         }
+
+
+        // 3. Generar token JWT
+        String token = jwtUtil.generateToken(admin);
+
+        return ResponseEntity.ok(new AdminLoginResponse(token, admin));
     }
 
     // ===========================================
@@ -73,23 +80,19 @@ public class AuthController {
     @PostMapping("/login-user")
     public ResponseEntity<?> loginUser(@RequestBody UserLoginRequest request) {
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getEmail(), request.getPassword()
-                    )
-            );
+        // 1. Buscar usuario por email
+        UserModel user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
 
-            UserModel user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-            String token = jwtUtil.generateToken(user);
-
-            return ResponseEntity.ok(new UserLoginResponse(token, user));
-
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Credenciales incorrectas");
+        // 2. Comparar contraseña NORMAL (sin encode)
+        if (!request.getPassword().equals(user.getPassword())) {
+            throw new BadCredentialsException("Contraseña incorrecta");
         }
+
+        // 3. Generar token JWT para usuario
+        String token = jwtUtil.generateToken(user);
+
+        return ResponseEntity.ok(new UserLoginResponse(token, user));
     }
+
 }
