@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.usuarios.Demo.model.UserModel;
@@ -20,12 +21,35 @@ import jakarta.transaction.Transactional;
 public class UserModelService {
 
     private final IUserModelRepository userModelRepository;
-    private final EmailService emailService; // ← agregamos el servicio de correos
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
-    // Constructor con ambos servicios inyectados
-    public UserModelService(IUserModelRepository userModelRepository, EmailService emailService) {
+    public UserModelService(IUserModelRepository userModelRepository,
+                            EmailService emailService,
+                            PasswordEncoder passwordEncoder) {
         this.userModelRepository = userModelRepository;
         this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public UserModel createUser(UserModel user) {
+        if (user.getId() != null && userModelRepository.findById(user.getId()).isPresent()) {
+            throw new EntityExistsException("El usuario con ID " + user.getId() + " ya existe.");
+        }
+
+        user.setActive(true);
+        user.setLastActivity(LocalDateTime.now());
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // ⬅ encriptar
+
+        UserModel nuevo = userModelRepository.save(user);
+
+        try {
+            emailService.enviarCorreoBienvenida(nuevo.getEmail(), nuevo.getUsername());
+        } catch (Exception e) {
+            System.err.println("⚠️ Error al enviar correo: " + e.getMessage());
+        }
+
+        return nuevo;
     }
 
     public List<UserModel> getAllUsers() {
@@ -44,25 +68,7 @@ public class UserModelService {
         return user;
     }
 
-    public UserModel createUser(UserModel user) {
-    if (user.getId() != null && userModelRepository.findById(user.getId()).isPresent()) {
-        throw new EntityExistsException("El usuario con ID " + user.getId() + " ya existe.");
-    }
-
-    user.setActive(true);
-    user.setLastActivity(LocalDateTime.now()); // Primera actividad
-    UserModel nuevo = userModelRepository.save(user);
-
-    // Enviar correo de bienvenida (sin romper si falla)
-    try {
-        emailService.enviarCorreoBienvenida(nuevo.getEmail(), nuevo.getUsername());
-    } catch (Exception e) {
-        System.err.println("⚠️ Error al enviar correo: " + e.getMessage());
-    }
-
-    return nuevo;
-}
-
+   
     public UserModel actualizarUser(UUID id, UserModel user) {
         Optional<UserModel> existeUser = userModelRepository.findById(id);
         if (existeUser.isEmpty()) {

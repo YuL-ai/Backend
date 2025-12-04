@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.usuarios.Demo.model.AdminModel;
@@ -13,15 +14,34 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
+
 @Service
 @Transactional
 public class AdminModelService {
 
     private final IAdminModelRepository adminModelRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminModelService(IAdminModelRepository adminModelRepository) {
+    public AdminModelService(IAdminModelRepository adminModelRepository,
+                             PasswordEncoder passwordEncoder) {
         this.adminModelRepository = adminModelRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+
+    /* Crear un nuevo administrador */
+    public AdminModel createAdmin(AdminModel admin) {
+        if (admin.getId() != null && adminModelRepository.findById(admin.getId()).isPresent()) {
+            throw new EntityExistsException("El administrador con ID " + admin.getId() + " ya existe.");
+        }
+
+        admin.setRol("ADMIN");
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+
+        return adminModelRepository.save(admin);
+    }
+
+    
+
 
     /* Obtener todos los administradores */
     public List<AdminModel> getAllAdmins() {
@@ -38,17 +58,6 @@ public class AdminModelService {
                 .orElseThrow(() -> new EntityNotFoundException("Administrador no encontrado con ID " + id));
     }
 
-    /* Crear un nuevo administrador */
-    public AdminModel createAdmin(AdminModel admin) {
-        if (admin.getId() != null && adminModelRepository.findById(admin.getId()).isPresent()) {
-            throw new EntityExistsException("El administrador con ID " + admin.getId() + " ya existe.");
-        }
-
-        // Asignar rol automáticamente
-        admin.setRol("ADMIN");
-
-        return adminModelRepository.save(admin);
-    }
 
     /* Actualizar datos de un administrador existente */
     public AdminModel actualizarAdmin(UUID id, AdminModel admin) {
