@@ -38,7 +38,8 @@ public class PapaModel {
     private String lema;
     private String descripcion;
     private int precio;
-    private String imagenURL;   
+    private String imagenURL;
+    private String rol = "PAPA";   
     
     @Transient
     public Integer getEdad() {
